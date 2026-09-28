@@ -5,88 +5,55 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Golden S.</title>
   <style>
-    /* Estilo simple y amigable */
-    :root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-    body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:linear-gradient(135deg,#fff8f0,#fff1e6);}
-    .card{background:#fff;padding:28px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.08);max-width:520px;text-align:center}
-    h1{margin:0 0 8px;font-size:20px}
-    p{margin:0 0 18px;color:#666}
+    :root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:16px;box-sizing:border-box;background:linear-gradient(135deg,#fff8f0,#fff1e6)}
+    .card{background:#fff;padding:28px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);max-width:520px;width:100%;text-align:center}
+    h1{margin:0 0 8px;font-size:20px}p{margin:0 0 18px;color:#666}
     .btn{display:inline-block;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:600;border:0;cursor:pointer}
-    .btn-primary{background:#d97706;color:#fff}
-    .btn-secondary{background:#f3f4f6;color:#111;margin-left:8px}
-    small{display:block;margin-top:12px;color:#999}
+    .btn-primary{background:#d97706;color:#fff}.btn-secondary{background:#f3f4f6;color:#111;margin-left:8px}
+    small{display:block;margin-top:12px;color:#999}ul{list-style:none;padding:0;margin:0}
+    li{margin:8px 0}li a{padding:10px 12px;border-radius:8px;background:#f8fafc;display:inline-block;text-decoration:none;color:#111}
   </style>
 </head>
 <body>
-  <div class="card" id="card">
+  <main class="card" id="card">
     <h1>Golden S.</h1>
     <p>Te estamos conectando con uno de nuestros números de WhatsApp. Si la redirección no funciona, podés elegir manualmente abajo.</p>
-
     <div id="actions">
       <button class="btn btn-primary" id="openBtn">Ir a WhatsApp (redirección automática)</button>
-      <a class="btn btn-secondary" id="chooseBtn" href="#" onclick="openManual(event)">Elegir número manual</a>
+      <a class="btn btn-secondary" id="chooseBtn" href="#">Elegir número manual</a>
     </div>
-
-    <small>Pagos en el acto!
-  </div>
-
+    <small>Pagos en el acto!</small>
+  </main>
   <script>
-    // ---------- CONFIGURACIÓN ----------
-    // Números en formato internacional (sin +, sin espacios)
-    const numbers = [
-      
-"5491136122445",
-    ];
-
-    // Mensaje pre-cargado (opcional). Cambialo si querés.
+    // Se completa con la dirección del servicio siguiendo la guía de instalación.
+    const API_URL = "https://numerosnuevosdeatencion.goldenfl2026.workers.dev";
     const mensaje = encodeURIComponent("Hola! Quisiera mas info sobre Golden S. <3");
-
-    // Tiempo antes de redirigir automáticamente (ms). 0 = inmediata.
-    const redirectDelay = 1600; // 1600ms para que el usuario vea la card. Cambialo a 0 si querés sin espera.
-    // ------------------------------------
-
-    function elegirNumeroRandom() {
-      return numbers[Math.floor(Math.random() * numbers.length)];
-    }
-
-    function buildWaLink(number) {
-      // Si no querés mensaje pre-cargado, eliminá + "?text=" + mensaje
-      return "https://wa.me/" + number + "?text=" + mensaje;
-    }
-
-    // Redirección automática al cargar (después de redirectDelay)
-    document.getElementById("openBtn").addEventListener("click", () => {
-      // Forzar redirección si el usuario hace click
-      const num = elegirNumeroRandom();
-      window.location.href = buildWaLink(num);
-    });
-
-    // Inicia la redirección automática al cargar la página (opcional)
-    setTimeout(() => {
-      const num = elegirNumeroRandom();
-      window.location.href = buildWaLink(num);
-    }, redirectDelay);
-
-    // Opción: mostrar selector manual
-    function openManual(e) {
+    const redirectDelay = 1600;
+    let numbers = [];
+    const card = document.getElementById("card");
+    function buildWaLink(number){return "https://wa.me/"+number+"?text="+mensaje}
+    function elegirNumeroRandom(){return numbers[Math.floor(Math.random()*numbers.length)]}
+    function mostrarFalla(){card.innerHTML='<h1>Golden S.</h1><p>En este momento no pudimos cargar los números. Probá de nuevo en unos segundos.</p>'}
+    function openManual(e){
       e.preventDefault();
-      const list = numbers.map(n => {
-        const display = n.replace(/^54/, ""); // muestra sin country code quedando más legible
-        return `<li style="margin:8px 0;">
-                  <a style="padding:10px 12px;border-radius:8px;background:#f8fafc;display:inline-block;text-decoration:none;color:#111"
-                     href="${buildWaLink(n)}" target="_blank" rel="noopener">
-                     Abrir WhatsApp ${display}
-                  </a>
-                </li>`;
-      }).join("");
-      // Reemplaza el contenido por la lista
-      document.getElementById("card").innerHTML = `
-        <h1>Golden</h1>
-        <p>Elegí con cuál número de WhatsApp querés comunicarte:</p>
-        <ul style="list-style:none;padding:0;margin:0">${list}</ul>
-        <small style="display:block;margin-top:12px">Volverá a redirigir automáticamente si recargás la página.</small>
-      `;
+      const list=numbers.map(n=>`<li><a href="${buildWaLink(n)}" target="_blank" rel="noopener">Abrir WhatsApp ${n.replace(/^54/,"")}</a></li>`).join("");
+      card.innerHTML=`<h1>Golden</h1><p>Elegí con cuál número de WhatsApp querés comunicarte:</p><ul>${list}</ul><small>Volverá a redirigir automáticamente si recargás la página.</small>`;
     }
+    async function iniciar(){
+      if(API_URL.includes("PEGAR_URL")){mostrarFalla();return}
+      try{
+        const response=await fetch(API_URL+"/numbers",{cache:"no-store"});
+        if(!response.ok)throw new Error("No se pudo cargar la lista");
+        const data=await response.json();
+        numbers=Array.isArray(data.numbers)?data.numbers:[];
+        if(!numbers.length)throw new Error("No hay números disponibles");
+        document.getElementById("openBtn").addEventListener("click",()=>{location.href=buildWaLink(elegirNumeroRandom())});
+        document.getElementById("chooseBtn").addEventListener("click",openManual);
+        setTimeout(()=>{if(document.visibilityState==="visible")location.href=buildWaLink(elegirNumeroRandom())},redirectDelay);
+      }catch(error){mostrarFalla()}
+    }
+    iniciar();
   </script>
 </body>
-      </html>
+</html>
