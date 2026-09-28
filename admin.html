@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow"><title>Administrar teléfonos · Golden</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;padding:24px;background:#fff8f0;color:#27231f;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+    main{max-width:720px;margin:32px auto;background:white;padding:28px;border-radius:16px;box-shadow:0 8px 30px #00000012}h1{margin-top:0;font-size:24px}p{color:#625c55}
+    label{display:block;font-weight:600;margin:14px 0 6px}input{width:100%;padding:11px;border:1px solid #d6d0c8;border-radius:8px;font:inherit}
+    button{padding:10px 14px;border:0;border-radius:8px;background:#d97706;color:white;font:inherit;font-weight:600;cursor:pointer;margin-top:12px}button.secondary{background:#eee9e2;color:#302a24}button.danger{background:#a63232;margin-left:6px}
+    .row{border:1px solid #eee7de;border-radius:10px;padding:14px;margin:12px 0}.row-actions{display:flex;gap:8px;flex-wrap:wrap}.status{min-height:24px;margin-top:12px}.hint{font-size:14px;color:#746e67}.hidden{display:none!important}
+  </style>
+</head>
+<body><main>
+  <h1>Administrar números de WhatsApp</h1>
+  <p>Esta pantalla es para el equipo. El nombre/aclaración se guarda solo para identificar el número y nunca aparece en el sitio público.</p>
+  <section id="login">
+    <label for="password">Contraseña</label><input id="password" type="password" autocomplete="current-password">
+    <button id="loginButton">Ingresar</button>
+  </section>
+  <section id="editor" class="hidden">
+    <div id="numbers"></div>
+    <h2>Agregar número</h2>
+    <label for="newLabel">Nombre o aclaración (solo para ustedes)</label><input id="newLabel" placeholder="Ej.: Turno tarde">
+    <label for="newPhone">Teléfono internacional, solo números</label><input id="newPhone" inputmode="numeric" placeholder="54911...">
+    <button id="addButton">Agregar número</button>
+    <button id="logoutButton" class="secondary">Cerrar sesión</button>
+    <p class="hint">Usá el formato internacional sin +, espacios ni guiones. Ejemplo: 5491136122445.</p>
+  </section>
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+</main>
+<script>
+  // Reemplazar por la URL del servicio cuando quede publicado.
+  const API_URL="https://numerosnuevosdeatencion.goldenfl2026.workers.dev";
+  let token=sessionStorage.getItem("golden_admin_token")||"";
+  let entries=[];
+  const statusBox=document.getElementById("status");
+  function status(message){statusBox.textContent=message}
+  function showEditor(){document.getElementById("login").classList.add("hidden");document.getElementById("editor").classList.remove("hidden")}
+  function phoneOk(phone){return /^\d{8,15}$/.test(phone)}
+  async function api(path,options={}){
+    const response=await fetch(API_URL+path,{...options,headers:{"Content-Type":"application/json",...(token?{"Authorization":"Bearer "+token}:{}),...(options.headers||{})}});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result.error||"No se pudo completar la operación");
+    return result;
+  }
+  function render(){
+    const root=document.getElementById("numbers");
+    root.innerHTML=entries.map((item,index)=>`<div class="row"><label>Nombre o aclaración</label><input data-label="${index}" value="${escapeHtml(item.label)}"><label>Teléfono</label><input data-phone="${index}" inputmode="numeric" value="${escapeHtml(item.phone)}"><div class="row-actions"><button data-save="${index}">Guardar cambios</button><button class="danger" data-delete="${index}">Eliminar</button></div></div>`).join("")||"<p>Todavía no hay números cargados.</p>";
+    root.querySelectorAll("[data-save]").forEach(button=>button.onclick=()=>saveEntry(Number(button.dataset.save)));
+    root.querySelectorAll("[data-delete]").forEach(button=>button.onclick=()=>deleteEntry(Number(button.dataset.delete)));
+  }
+  function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
+  async function load(){try{const data=await api("/admin/numbers");entries=data.entries||[];render();showEditor();status("")}catch(error){sessionStorage.removeItem("golden_admin_token");token="";document.getElementById("login").classList.remove("hidden");document.getElementById("editor").classList.add("hidden");status(error.message)}}
+  async function save(){try{await api("/admin/numbers",{method:"PUT",body:JSON.stringify({entries})});status("Cambios guardados.")}catch(error){status(error.message)}}
+  async function saveEntry(index){const label=document.querySelector(`[data-label="${index}"]`).value.trim();const phone=document.querySelector(`[data-phone="${index}"]`).value.trim();if(!label){status("Escribí una aclaración para identificar este número.");return}if(!phoneOk(phone)){status("El teléfono debe tener entre 8 y 15 dígitos, sin + ni espacios.");return}entries[index]={label,phone};await save();render()}
+  async function deleteEntry(index){if(!confirm(`¿Eliminar “${entries[index].label}”?`))return;entries.splice(index,1);await save();render()}
+  document.getElementById("loginButton").onclick=async()=>{try{const result=await api("/admin/login",{method:"POST",body:JSON.stringify({password:document.getElementById("password").value})});token=result.token;sessionStorage.setItem("golden_admin_token",token);await load()}catch(error){status(error.message)}};
+  document.getElementById("addButton").onclick=async()=>{const label=document.getElementById("newLabel").value.trim();const phone=document.getElementById("newPhone").value.trim();if(!label){status("Escribí una aclaración para identificar este número.");return}if(!phoneOk(phone)){status("El teléfono debe tener entre 8 y 15 dígitos, sin + ni espacios.");return}entries.push({label,phone});await save();document.getElementById("newLabel").value="";document.getElementById("newPhone").value="";render()};
+  document.getElementById("logoutButton").onclick=()=>{sessionStorage.removeItem("golden_admin_token");token="";location.reload()};
+  if(API_URL.includes("PEGAR_URL")){status("Falta configurar la URL del servicio. Seguí la guía de instalación.")}else if(token){load()}
+</script></body></html>
