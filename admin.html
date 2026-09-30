@@ -3,13 +3,29 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow"><title>Administrar teléfonos · Golden</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    *{box-sizing:border-box}body{margin:0;padding:24px;background:#fff8f0;color:#27231f;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-    main{max-width:720px;margin:32px auto;background:white;padding:28px;border-radius:16px;box-shadow:0 8px 30px #00000012}h1{margin-top:0;font-size:24px}p{color:#625c55}
-    label{display:block;font-weight:600;margin:14px 0 6px}input{width:100%;padding:11px;border:1px solid #d6d0c8;border-radius:8px;font:inherit}
-    button{padding:10px 14px;border:0;border-radius:8px;background:#d97706;color:white;font:inherit;font-weight:600;cursor:pointer;margin-top:12px}button.secondary{background:#eee9e2;color:#302a24}button.danger{background:#a63232;margin-left:6px}
-    .row{border:1px solid #eee7de;border-radius:10px;padding:14px;margin:12px 0}.row-actions{display:flex;gap:8px;flex-wrap:wrap}.status{min-height:24px;margin-top:12px}.hint{font-size:14px;color:#746e67}.hidden{display:none!important}
-  </style>
+    *,:before,:after{box-sizing:border-box}
+    :root{--gold:#d4a843;--gold-light:#f0d078;--gold-dark:#a07c2e;--gold-rgb:212,168,67;--bg-primary:#080808;--bg-card:#131313;--bg-input:#1a1a1a;--border:#252525;--border-gold:rgba(212,168,67,.22);--text-primary:#e8e0d0;--text-secondary:#8a8070}
+    body{font-family:'Outfit',sans-serif;background:var(--bg-primary);color:var(--text-primary);margin:0;padding:32px 18px;min-height:100vh;overflow-x:hidden}
+    body:before{content:'';position:fixed;inset:0;opacity:.025;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+    main{position:relative;z-index:1;width:min(100%,760px);margin:30px auto;padding:34px;background:linear-gradient(160deg,#151515 0%,#101010 100%);border:1px solid var(--border-gold);border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.62),0 0 38px rgba(var(--gold-rgb),.055)}
+    h1{margin:0 0 10px;text-align:center;font-family:'Cinzel',serif;font-size:clamp(22px,4vw,30px);font-weight:700;letter-spacing:2.5px;text-transform:uppercase;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    main>p:first-of-type{text-align:center;max-width:580px;margin:0 auto 28px;color:var(--text-secondary);font-size:14px;line-height:1.65}
+    h2{margin:28px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--border-gold);font-family:'Cinzel',serif;font-size:15px;letter-spacing:1.5px;color:var(--gold-light)}
+    label{display:block;margin:15px 0 6px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold)}
+    input{display:block;width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg-input);color:var(--text-primary);font:400 14px 'Outfit',sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}
+    input::placeholder{color:#625c52}input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(var(--gold-rgb),.12)}
+    button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 16px;margin:14px 8px 0 0;border:1px solid rgba(var(--gold-rgb),.55);border-radius:8px;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));color:#0a0a0a;font:600 12px 'Cinzel',serif;letter-spacing:.7px;text-transform:uppercase;cursor:pointer;transition:transform .18s,box-shadow .18s,filter .18s}
+    button:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(var(--gold-rgb),.2);filter:brightness(1.06)}button:focus-visible{outline:2px solid var(--gold-light);outline-offset:3px}
+    button.secondary{background:rgba(255,255,255,.035);border-color:var(--border);color:var(--text-secondary)}button.secondary:hover{border-color:var(--border-gold);color:var(--gold-light);box-shadow:none}
+    button.danger{margin-left:0;background:rgba(180,54,54,.12);border-color:rgba(231,76,60,.4);color:#e58b83}button.danger:hover{background:rgba(180,54,54,.2);box-shadow:0 4px 15px rgba(231,76,60,.12)}
+    #login{max-width:390px;margin:0 auto;padding:22px;background:rgba(255,255,255,.018);border:1px solid var(--border);border-radius:12px}#login button{width:100%}
+    .row{margin:14px 0;padding:18px;background:linear-gradient(145deg,#151515,#111);border:1px solid var(--border);border-radius:12px;transition:border-color .2s}.row:focus-within{border-color:rgba(var(--gold-rgb),.42)}
+    .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+    .status{min-height:24px;margin-top:18px;padding:0 4px;color:var(--gold-light);font-size:13px;text-align:center}.hint{margin:16px 0 0;color:var(--text-secondary);font-size:12px;line-height:1.6}
+    .hidden{display:none!important}
+    @media(max-width:600px){body{padding:14px 10px}main{margin:10px auto;padding:24px 18px;border-radius:12px}.row{padding:14px}.row-actions button{flex:1}}`r`n  </style>
 </head>
 <body><main>
   <h1>Administrar números de WhatsApp</h1>
